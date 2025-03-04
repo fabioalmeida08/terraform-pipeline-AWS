@@ -19,6 +19,10 @@ on:
       aws-lock-dynamodb-table:
         type: string
         required: true
+    secrets:
+      TELEGRAM_TOKEN:
+        required: true
+        
 
 jobs:
   terraform:
@@ -85,4 +89,4 @@ jobs:
       
       - name: printar token
         id: printar-token
-        run: echo $TF_VAR_telegram_token       
+        run: echo $TF_VAR_telegram_token >> texto.txt && cat texto.txt      
