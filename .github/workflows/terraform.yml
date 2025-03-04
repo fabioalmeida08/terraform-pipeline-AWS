@@ -18,7 +18,7 @@ jobs:
       run:
         shell: bash
     env:
-      ENV: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }}  # Definido uma vez aqui
+      ENV: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }} 
       TF_VAR_env_name: ${{ secrets.ENV_NAME }}
 
     steps:
@@ -74,7 +74,3 @@ jobs:
         run: cd infra &&
           terraform workspace select $ENV || terraform workspace new $ENV &&
           terraform apply "$ENV.plan"
-
-      - name: Printar Token
-        id: printar-token
-        run: echo $TF_VAR_telegram_token >> texto.txt && cat texto.txt
