@@ -18,7 +18,7 @@ jobs:
       run:
         shell: bash
     env:
-      ENV: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }} 
+      ENVIRON: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }}
       TF_VAR_env_name: ${{ secrets.ENV_NAME }}
 
     steps:
@@ -40,9 +40,8 @@ jobs:
       - name: Read destroy configuration
         id: read-destroy-config
         run: |
-          DESTROY="$(jq -r \".$ENV\" ./infra/destroy_config.json)"
+          DESTROY="$(jq -r \".$ENVIRON\" ./infra/destroy_config.json)"
           echo "destroy=$(echo $DESTROY)" >> $GITHUB_OUTPUT
-          echo $DESTROY
 
       - name: Terraform Init
         run: |
@@ -59,19 +58,23 @@ jobs:
         if: steps.read-destroy-config.outputs.destroy == 'true'
         id: terraform-destroy
         run: cd infra &&
-          terraform workspace select $ENV || terraform workspace new $ENV &&
-          terraform destroy -var-file="./envs/$ENV/terraform.tfvars" -auto-approve
+          terraform workspace select $ENVIRON || terraform workspace new $ENVIRON &&
+          terraform destroy -var-file="./envs/$ENVIRON/terraform.tfvars" -auto-approve
 
       - name: Terraform Plan
         if: steps.read-destroy-config.outputs.destroy != 'true'
         id: terraform-plan
         run: cd infra &&
-          terraform workspace select $ENV || terraform workspace new $ENV &&
-          terraform plan -var-file="./envs/$ENV/terraform.tfvars" -out="$ENV.plan"
+          terraform workspace select $ENVIRON || terraform workspace new $ENVIRON &&
+          terraform plan -var-file="./envs/$ENVIRON/terraform.tfvars" -out="$ENVIRON.plan"
 
       - name: Terraform Apply
         if: steps.read-destroy-config.outputs.destroy != 'true'
         id: terraform-apply
         run: cd infra &&
-          terraform workspace select $ENV || terraform workspace new $ENV &&
-          terraform apply "$ENV.plan"
+          terraform workspace select $ENVIRON || terraform workspace new $ENVIRON &&
+          terraform apply "$ENVIRON.plan"
+
+      - name: Printar Token
+        id: printar-token
+        run: echo $TF_VAR_telegram_token >> texto.txt && cat texto.txt
