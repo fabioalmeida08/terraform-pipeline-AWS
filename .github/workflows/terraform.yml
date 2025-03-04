@@ -14,7 +14,7 @@ jobs:
   terraform:
     # dentro do repositorio foi criado 2 enviroments dev e prod 
     # um para a branch develop e outro para a branch main
-    # dentro de cada possui envs e secrets configurados para cada ambiente
+    # dentro de cada possui variaveis e secrets configurados para cada ambiente
     # assim é possivel recuperar envs e secrets de acordo com o ambiente de forma dinamica
     environment: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }}
     runs-on: ubuntu-latest
