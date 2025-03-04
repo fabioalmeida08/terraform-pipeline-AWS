@@ -19,9 +19,6 @@ on:
       aws-lock-dynamodb-table:
         type: string
         required: true
-    secrets:
-      TELEGRAM_TOKEN:
-        required: true
         
 
 jobs:
