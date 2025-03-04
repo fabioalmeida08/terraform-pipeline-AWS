@@ -19,16 +19,22 @@ on:
       aws-lock-dynamodb-table:
         type: string
         required: true
-        
+  # push:
+  #   branches:
+  #     - develop
+  #     - main  
+    
+
 
 jobs:
   terraform:
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
     env:
-      TF_VAR_telegram_token: ${{ secrets.TELEGRAM_TOKEN }}        
+      TF_VAR_env_name: ${{ secrets.env_name }}        
 
     steps:
       - name: Checkout code
