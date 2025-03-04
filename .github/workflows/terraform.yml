@@ -2,6 +2,7 @@ name: "Terraform Workflow"
 
 on:
   workflow_call:
+    #TODO: deixar aqui somente o env e a região e usar os ${{ secrets}} para o restante
     inputs:
       environment:
         type: string
@@ -25,6 +26,8 @@ jobs:
     defaults:
       run:
         shell: bash
+    env:
+      TF_VAR_telegram_token: ${{ secrets.TELEGRAM_TOKEN }}        
 
     steps:
       - name: Checkout code
@@ -79,3 +82,7 @@ jobs:
         run: cd infra &&
           terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
           terraform apply "${{ inputs.environment }}.plan"
+      
+      - name: printar token
+        id: printar-token
+        run: echo $TF_VAR_telegram_token       
