@@ -41,8 +41,6 @@ jobs:
         id: read-destroy-config
         run: |
           DESTROY="$(jq -r ".$ENVIRON" ./infra/destroy_config.json)"
-          echo "$DESTROY" > temp.txt  # Grava em um arquivo
-          cat temp.txt  # Exibe o conteúdo
           echo "destroy=$(echo $DESTROY)" >> $GITHUB_OUTPUT
 
       - name: Terraform Init
@@ -76,7 +74,3 @@ jobs:
         run: cd infra &&
           terraform workspace select $ENVIRON || terraform workspace new $ENVIRON &&
           terraform apply "$ENVIRON.plan"
-
-      - name: Printar Token
-        id: printar-token
-        run: echo $TF_VAR_telegram_token >> texto.txt && cat texto.txt
