@@ -1,40 +1,25 @@
 name: "Terraform Workflow"
 
 on:
-  workflow_call:
-    #TODO: deixar aqui somente o env e a região e usar os ${{ secrets}} para o restante
-    inputs:
-      environment:
-        type: string
-        required: true
-      # aws-assume-role-arn:
-      #   type: string
-      #   required: true
-      aws-region:
-        type: string
-        required: true
-      aws-statefile-s3-bucket:
-        type: string
-        required: true
-      aws-lock-dynamodb-table:
-        type: string
-        required: true
-  # push:
-  #   branches:
-  #     - develop
-  #     - main  
-    
+  push:
+    branches:
+      - develop
+      - main
 
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   terraform:
-    environment: ${{ inputs.environment }}
+    environment: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }}
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
     env:
-      TF_VAR_env_name: ${{ secrets.env_name }}        
+      ENV: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }}  # Definido uma vez aqui
+      TF_VAR_env_name: ${{ secrets.ENV_NAME }}
 
     steps:
       - name: Checkout code
@@ -50,21 +35,21 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: ${{ inputs.aws-region }}
+          aws-region: "us-east-1"
 
       - name: Read destroy configuration
         id: read-destroy-config
         run: |
-          DESTROY="$(jq -r '.${{ inputs.environment }}' ./infra/destroy_config.json)"
+          DESTROY="$(jq -r \".$ENV\" ./infra/destroy_config.json)"
           echo "destroy=$(echo $DESTROY)" >> $GITHUB_OUTPUT
 
       - name: Terraform Init
         run: |
           cd infra && terraform init \
-            -backend-config="bucket=${{ inputs.aws-statefile-s3-bucket }}" \
+            -backend-config="bucket=fabioalmeida08-us-east-1-terraform-pipeline" \
             -backend-config="key=${{ github.event.repository.name }}" \
-            -backend-config="region=${{ inputs.aws-region }}" \
-            -backend-config="dynamodb_table=${{ inputs.aws-lock-dynamodb-table }}"
+            -backend-config="region=us-east-1" \
+            -backend-config="dynamodb_table=fabioalmeida08-us-east-1-terraform-lock"
 
       - name: Terraform Validate
         run: terraform validate
@@ -73,23 +58,23 @@ jobs:
         if: steps.read-destroy-config.outputs.destroy == 'true'
         id: terraform-destroy
         run: cd infra &&
-          terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
-          terraform destroy -var-file="./envs/${{ inputs.environment }}/terraform.tfvars" -auto-approve
+          terraform workspace select $ENV || terraform workspace new $ENV &&
+          terraform destroy -var-file="./envs/$ENV/terraform.tfvars" -auto-approve
 
       - name: Terraform Plan
         if: steps.read-destroy-config.outputs.destroy != 'true'
         id: terraform-plan
         run: cd infra &&
-          terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
-          terraform plan -var-file="./envs/${{ inputs.environment }}/terraform.tfvars" -out="${{ inputs.environment }}.plan"
+          terraform workspace select $ENV || terraform workspace new $ENV &&
+          terraform plan -var-file="./envs/$ENV/terraform.tfvars" -out="$ENV.plan"
 
       - name: Terraform Apply
         if: steps.read-destroy-config.outputs.destroy != 'true'
         id: terraform-apply
         run: cd infra &&
-          terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
-          terraform apply "${{ inputs.environment }}.plan"
-      
-      - name: printar token
+          terraform workspace select $ENV || terraform workspace new $ENV &&
+          terraform apply "$ENV.plan"
+
+      - name: Printar Token
         id: printar-token
-        run: echo $TF_VAR_telegram_token >> texto.txt && cat texto.txt      
+        run: echo $TF_VAR_telegram_token >> texto.txt && cat texto.txt
