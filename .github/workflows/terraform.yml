@@ -47,7 +47,7 @@ jobs:
             -backend-config="bucket=${{ vars.BACKEND_BUCKET }}" \
             -backend-config="key=${{ github.event.repository.name }}" \
             -backend-config="region=${{ vars.BACKEND_REGION }}" \
-            -backend-config="dynamodb_table=${{ vars.BACKEND_DYNAMODB_TABLE }}"
+            -backend-config="use_lockfile=${{ vars.BACKEND_DYNAMODB_TABLE }}"
 
       - name: Terraform Validate
         run: terraform validate
