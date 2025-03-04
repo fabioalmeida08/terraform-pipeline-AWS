@@ -5,9 +5,8 @@ on:
     branches:
       - develop
       - main
-    paths-ignore:
-      - 'README.md'
-      - 'github_actions_terraform_pipeline.png'
+    paths:
+      - 'infra/**'
 permissions:
   id-token: write
   contents: read
