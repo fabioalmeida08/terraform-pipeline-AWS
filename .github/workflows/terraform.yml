@@ -46,10 +46,10 @@ jobs:
       - name: Terraform Init
         run: |
           cd infra && terraform init \
-            -backend-config="bucket=fabioalmeida08-us-east-1-terraform-pipeline" \
+            -backend-config="bucket=${{ vars.BACKEND_BUCKET }}" \
             -backend-config="key=${{ github.event.repository.name }}" \
-            -backend-config="region=us-east-1" \
-            -backend-config="dynamodb_table=fabioalmeida08-us-east-1-terraform-lock"
+            -backend-config=${{vars.BACKEND_REGION }}" \
+            -backend-config="dynamodb_table=${{ vars.BACKEND_DYNAMODB_TABLE }}"
 
       - name: Terraform Validate
         run: terraform validate
