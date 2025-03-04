@@ -19,7 +19,7 @@ jobs:
         shell: bash
     env:
       ENVIRON: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }}
-      TF_VAR_env_name: $ENVIRON
+      TF_VAR_env_name: ${{ github.env }}
 
     steps:
       - name: Checkout code
