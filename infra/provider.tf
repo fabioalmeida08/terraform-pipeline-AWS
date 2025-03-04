@@ -10,4 +10,11 @@ terraform {
 provider "aws" {
   # Configuration options
   region = "us-east-1"
+
+  default_tags {
+    tags = {
+      Environment = var.env_name
+      Project     = "Learning"
+    }
+  }
 }
