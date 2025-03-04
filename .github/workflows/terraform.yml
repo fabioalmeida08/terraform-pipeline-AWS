@@ -41,7 +41,8 @@ jobs:
         id: read-destroy-config
         run: |
           DESTROY="$(jq -r \".$ENVIRON\" ./infra/destroy_config.json)"
-          echo "Valor de DESTROY: DEBUG_$DESTROY"
+          echo "$DESTROY" > temp.txt  # Grava em um arquivo
+          cat temp.txt  # Exibe o conteúdo
           echo "destroy=$(echo $DESTROY)" >> $GITHUB_OUTPUT
 
       - name: Terraform Init
