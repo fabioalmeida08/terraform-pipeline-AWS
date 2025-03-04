@@ -1,4 +1,4 @@
-name: "Terraform Workflow"
+name: 'Terraform Workflow'
 
 on:
   push:
@@ -27,15 +27,13 @@ jobs:
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.8.3
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: "us-east-1"
+          aws-region: 'us-east-1'
 
       - name: Read destroy configuration
         id: read-destroy-config
@@ -48,7 +46,7 @@ jobs:
           cd infra && terraform init \
             -backend-config="bucket=${{ vars.BACKEND_BUCKET }}" \
             -backend-config="key=${{ github.event.repository.name }}" \
-            -backend-config="region=${{vars.BACKEND_REGION }}" \
+            -backend-config="region=${{ vars.BACKEND_REGION }}" \
             -backend-config="dynamodb_table=${{ vars.BACKEND_DYNAMODB_TABLE }}"
 
       - name: Terraform Validate
