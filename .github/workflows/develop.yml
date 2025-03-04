@@ -14,7 +14,9 @@ jobs:
     uses: ./.github/workflows/terraform.yml
     with:
       environment: dev
-      aws-assume-role-arn: "arn:aws:iam::039612854187:role/github-actions-fabioalmeida08-pipeline"
       aws-region: "us-east-1"
       aws-statefile-s3-bucket: "fabioalmeida08-us-east-1-terraform-pipeline"
       aws-lock-dynamodb-table: "fabioalmeida08-us-east-1-terraform-lock"
+    secrets: inherit
+     
+
