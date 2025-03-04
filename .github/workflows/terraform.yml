@@ -24,6 +24,7 @@ jobs:
     env:
       ENVIRON: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }}
       TF_VAR_env_name: ${{ vars.ENV_NAME }}
+      TF_VAR_project_name: ${{ github.event.repository.name }}
 
     steps:
       - name: Checkout code
