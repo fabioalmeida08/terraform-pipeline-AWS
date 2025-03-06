@@ -44,7 +44,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ASSUME_ROLE_ARN }}
           role-session-name: GitHub_to_AWS_via_FederatedOIDC
-          aws-region: 'us-east-1'
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Read destroy configuration
         id: read-destroy-config
