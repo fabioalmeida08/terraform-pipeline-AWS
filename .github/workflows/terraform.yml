@@ -6,6 +6,8 @@ on:
       - develop
       - main
     paths:
+      # somente executa o workflow se houver alterações no diretórios listados
+      # possivel usar o paths-ignore para ignorar diretórios
       - 'infra/**'
 permissions:
   id-token: write
@@ -13,9 +15,9 @@ permissions:
 
 jobs:
   terraform:
-    # dentro do repositorio foi criado 2 enviroments dev e prod 
-    # um para a branch develop e outro para a branch main
-    # dentro de cada possui variaveis e secrets configurados para cada ambiente
+    # dentro do repositorio foi criado 2 enviroments dev e prod. 
+    # um para o branch develop e outro para a branch main.
+    # cada environment do repositorio possui variaveis e secrets diferentes
     # assim é possivel recuperar envs e secrets de acordo com o ambiente de forma dinamica
     environment: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }}
     runs-on: ubuntu-latest
@@ -23,7 +25,10 @@ jobs:
       run:
         shell: bash
     env:
-      ENVIRON: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }}
+      # aqui vão as variaveis de ambiente dentro da vm do workflow.
+      # variaveis de ambiente no terraform são definidas com o prefixo TF_VAR_ e são recuperadas
+      # de acordo com o environment do repositorio
+      ENVIRONMENT: ${{ github.ref == 'refs/heads/develop' && 'dev' || 'prod' }}
       TF_VAR_env_name: ${{ vars.ENV_NAME }}
       TF_VAR_project_name: ${{ github.event.repository.name }}
 
@@ -44,7 +49,7 @@ jobs:
       - name: Read destroy configuration
         id: read-destroy-config
         run: |
-          DESTROY="$(jq -r ".$ENVIRON" ./infra/destroy_config.json)"
+          DESTROY="$(jq -r ".$ENVIRONMENT" ./infra/destroy_config.json)"
           echo "destroy=$(echo $DESTROY)" >> $GITHUB_OUTPUT
 
       - name: Terraform Init
@@ -62,19 +67,19 @@ jobs:
         if: steps.read-destroy-config.outputs.destroy == 'true'
         id: terraform-destroy
         run: cd infra &&
-          terraform workspace select $ENVIRON || terraform workspace new $ENVIRON &&
-          terraform destroy -var-file="./envs/$ENVIRON/terraform.tfvars" -auto-approve
+          terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT &&
+          terraform destroy -var-file="./envs/$ENVIRONMENT/terraform.tfvars" -auto-approve
 
       - name: Terraform Plan
         if: steps.read-destroy-config.outputs.destroy != 'true'
         id: terraform-plan
         run: cd infra &&
-          terraform workspace select $ENVIRON || terraform workspace new $ENVIRON &&
-          terraform plan -var-file="./envs/$ENVIRON/terraform.tfvars" -out="$ENVIRON.plan"
+          terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT &&
+          terraform plan -var-file="./envs/$ENVIRONMENT/terraform.tfvars" -out="$ENVIRONMENT.plan"
 
       - name: Terraform Apply
         if: steps.read-destroy-config.outputs.destroy != 'true'
         id: terraform-apply
         run: cd infra &&
-          terraform workspace select $ENVIRON || terraform workspace new $ENVIRON &&
-          terraform apply "$ENVIRON.plan"
+          terraform workspace select $ENVIRONMENT || terraform workspace new $ENVIRONMENT &&
+          terraform apply "$ENVIRONMENT.plan"
