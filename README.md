@@ -2,7 +2,7 @@
 
 Este repositório é um projeto de aprendizado que tem como finalidade implementar uma pipeline de infraestrutura como código (IaC) utilizando Terraform e GitHub Actions. O objetivo é explorar conceitos como automação de CI/CD, gerenciamento de ambientes, uso de secrets e environments do GitHub, e integração com AWS.
 
-O Projeto é simples e cria somente dois buckets no s3 usando o terraform, um para cada ambiente e com configurações diferentes dependendo do branch que o código for editado e commitado.
+O Projeto é um simples workflow com a finalidade de criar dois buckets no s3 usando o terraform, um para cada ambiente e com configurações diferentes dependendo do branch que o código for editado e commitado.
 ![fluxo do projeto](./github_actions_terraform_pipeline.png)
 # Visão Geral
 
